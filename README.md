@@ -3,10 +3,10 @@ Restored  linker LINK.COM from the Hi-Tech C compiler v3.09
 
 # Introduction
 
-With the participation of Mark Ogden, the source code was restored  linker LINK.COM from the Hi-Tech C compiler v3.09.
-All functions and variables are assigned  understandable names.
+With the participation of Mark Ogden, the source code was restored linker LINK.COM from the Hi-Tech C compiler v3.09.
+All functions and variables are assigned understandable names.
 
-Compiling the program
+# Compiling the program
 
 The source code can be compiled for CP/M using a Makefile. This requires the latest version of gnu make.
 To compile using gcc on linux or macOS operating systems, run the command
