@@ -30,7 +30,7 @@ The source files for the dehuff and enhuff programs are available in the Tony Ni
 
 For functions that cannot be optimized with the help of the OPTIM program.COM for CP/M, the optim program compiled from the restored source code is used https://github.com/nikitinprior/doptim.
 
-The dos2unix program is temporarily used to delete the contents from the ^Z character to the end of the assembly language file created by the CGEN program.COM for CP/M.
+The dos2unix program is temporarily used to delete the contents from the ^Z character to the end of the assembly language file created by the CGEN.COM program for CP/M.
 
 When will the source code of the programs be restored P1.COM and ZAS.COM there will be no need for the dos2unix program.
 
