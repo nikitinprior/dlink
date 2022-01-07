@@ -8,10 +8,10 @@
  */
 
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 
 #if CPM
 #include <sys.h>
@@ -73,6 +73,8 @@ int main(int argc, char **argv) {
         argc = _argc_;
     }
 #endif
+    create_symtab(); /* PMO: moved before -U option which uses symtab */
+
     for (--argc, ++argv; argc != 0 && **argv == '-'; --argc, ++argv) {
 
         pOption = *argv + 1; /* m2: */
@@ -85,9 +87,9 @@ int main(int argc, char **argv) {
 
             case 'L':		/* Retain absolute relocation info */
             case 'l':
-                if ((*pOption == 'm') /* m8: */
-                    || (*pOption == 'M')) { /* Will retain only segement relocation */
-                    key_LM = 1;             /* information */ /* m9: */
+                if ((*pOption == 'm') || /* m8: */
+                    (*pOption == 'M')) { /* Will retain only segement relocation */
+                    key_LM = 1;          /* information  m9: */
                     pOption++; /* m10: */
                     break;
                 }
@@ -101,21 +103,21 @@ int main(int argc, char **argv) {
 
             case 'C':		/* Produce a binary output file offset */
             case 'c':
-                key_C = 1; /* by value */ /* m13: */
+                key_C = 1; /* by value m13: */
                 parseLongVal(&pOption, &offset_address);
                 break; /* m14: */
 
-            case 'S':
-            case 's':		/* Strip symbol information from output file */
+            case 'S':		/* Strip symbol information from output file */
+            case 's':
                 key_S = 1; /* m15: */
 
-            case 'X':
-            case 'x':		/* Suppress local symbols in output file */
+            case 'X':		/* Suppress local symbols in output file */
+            case 'x':
                 key_X = 1; /* m16: */
 
             case 'Z':		/* Suppress trivial (compiler-generated) */
             case 'z':
-                key_Z = 1; /* symbols in theoutput file */ /* m17: */
+                key_Z = 1; /* symbols in theoutput file m17: */
                 break;
 
             case 'O':		/* Call output file name */
@@ -205,13 +207,13 @@ int main(int argc, char **argv) {
     }
     if (argc == 0)
         fatal_err(usageMsg); /* m39: */
-    create_symtab(); /* m40: */
-    if (fname_outp == 0)     /* Assign default output file name */
+    /* create_symtab();  moved to before option processing as -U uses symbol table  m40: */
+    if (fname_outp == 0) { /* Assign default output file name */
         if (key_C)
             fname_outp = "l.bin";
         else
             fname_outp = "l.obj";
-
+    }
     outFp = fopen(fname_outp, "wb"); /* m42: */
     if (outFp == 0)
         fatal_err("%s: Can't create", fname_outp);
@@ -232,7 +234,12 @@ int main(int argc, char **argv) {
     for (linker_pass = 0; linker_pass < 2; ++linker_pass) { /* m56: */
         num_lib_files = 0; /* m49: */
         for (curFileId = 0; curFileId < argc; ++curFileId) { /* m54: */
+#ifdef CPM
             if (freopen((fname_obj = argv[curFileId]), "rb", stdin) == 0) /* m50: */
+#else
+            if (freopen((fname_obj = argv[curFileId]), "rb", stdin) == 0 && 
+                freopen(mkLibPath(fname_obj), "rb", stdin) == 0)
+#endif
                 fatal_err("%s: Can't open", fname_obj);
             if (is_library(fname_obj) != 0) { /* lib file */ /* m51: */
                 openLibrary();
@@ -423,8 +430,11 @@ void *xalloc(size_t p1) {
 }
 
 /**************************************************************************
- 41	clrbuf	ok++ (PMO)
+ 41	clrbuf	ok++ (PMO) (use macro for newer code)
+ as latest definition of memcpy uses restrict and gcc complains of overlap
+ also memset is usually inlined
  **************************************************************************/
+#ifdef CPM
 void clrbuf(register char *st, size_t p2) {
 
     if (p2 == 0)
@@ -432,8 +442,9 @@ void clrbuf(register char *st, size_t p2) {
     *st = 0;
     if (--p2 == 0)
         return;
-    bmove(st, st + 1, p2); /* Use bmove to copy 0 to remaining locations*/
+    bmove(st, st + 1, p2); /* use bmove to copy 0 to remaining locations*/
 }
+#endif
 
 /*
  *	Relocation type
@@ -480,7 +491,7 @@ void relocRecPass1() {
  **************************************************************************/
 void relocRecPass2() {
     uint8_t *rp;	 /* Pointer relocation information field */
-    sym_t   *ps;
+    sym_t   *ps = NULL;  /* PMO Force init */
     char    *name;	 /* Psect or external name               */
     size_t   len;	 /* Length relocation information field  */
     uint16_t offset;
@@ -759,13 +770,13 @@ void prSymbol(char *symbol_name, uint32_t value, int lflag, register sym_t *psec
     if (!key_H) {
         if (lflag != 0)
             return;
-        fprintf(symFp, "%4.4lx %s\n", value, symbol_name);
+        fprintf(symFp, "%4.4" PRIx32 " %s\n", value, symbol_name);
         return;
     }
 
     switch (lflag) {
     case SF_REGNAM:
-        fprintf(symFp, "%s reg %lx\n", symbol_name, value);
+        fprintf(symFp, "%s reg %" PRIx32 "\n", symbol_name, value);
         return;
 
     case SF_FILNAM:
@@ -773,13 +784,13 @@ void prSymbol(char *symbol_name, uint32_t value, int lflag, register sym_t *psec
         return;
 
     case SF_STACK:
-        fprintf(symFp, "%s stk %ld\n", symbol_name, value);
+        fprintf(symFp, "%s stk %" PRId32 "\n", symbol_name, value);
         return;
     }
 
-    fprintf(symFp, "%s %lx", symbol_name, value);
+    fprintf(symFp, "%s %" PRIx32 , symbol_name, value);
     if (psectSym != 0)
-        fprintf(symFp, " %lx", psectSym->p.pinfo->loadAddress - psectSym->p.pinfo->linkAddress);
+        fprintf(symFp, " %" PRIx32, psectSym->p.pinfo->loadAddress - psectSym->p.pinfo->linkAddress);
     fputc('\n', symFp);
     return;
 }

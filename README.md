@@ -11,7 +11,7 @@ All functions and variables are assigned understandable names.
 The source code can be compiled for CP/M using a Makefile. This requires the latest version of gnu make.
 To compile using gcc on linux or macOS operating systems, run the command
 
-  gcc -O2 -o link a.c b.c c.c ds.c e.c
+  gcc -O2 -o link a.c b.c c.c ds.c e.c extra.c
 
 as a result, the link executable file will be created.
 
@@ -36,10 +36,23 @@ When will the source code of the programs be restored P1.COM and ZAS.COM there w
 
 The dos2unix source code is also included in the archive file. 
 
+# Update 08.01.2022
+
+Added support for searching for the library and startup file. To use the search one of two environment variables need to be set.
+ 
+LIBDIR80              - path of the library and startup files
+or
+CPMDIR80           - path of the root of the CPM files as per zxcc. The actual library is in a subdirectory lib80 below the path specified by CPMDIR80
+ 
+As per zxcc, the LIBDIR80 path takes precedence.
+The search support is only provided for non CP/M builds and requires the additional extra.c file to be added to the build.
+
 # Appreciation
 
-Mark Ogden for his active participation in the restoration of the compiler source code.
+Mark Ogden for active participation in the restoration of the compiler source code.
 
 Tony Nicholson for maintaining  compiler information.
 
-Andrey Nikitin 07.01.2022
+Andrey Nikitin 08.01.2022
+
+

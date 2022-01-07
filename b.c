@@ -66,7 +66,12 @@ void openLibrary() {
     libraryName = fname_obj;
     fname_obj   = 0;
 
+#ifdef CPM
     if ((libraryFp = fopen(libraryName, "rb")) == 0)
+#else
+    if ((libraryFp = fopen(libraryName, "rb")) == 0 &&
+        (libraryFp = fopen(mkLibPath(libraryName), "rb")) == 0)
+#endif
         fatal_err("%s: Can't open", libraryName);
 
     if (fread(libBuf, 1, 4, libraryFp) != 4)

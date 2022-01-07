@@ -114,7 +114,7 @@ void prFileLinkMap() {
                 col = 1;
             } else if (col > 1)
                     fputc('\t', stdout);
-            printf("%-8.8s %8lx %8lx", pp->psectSym->name, addr, pp->endAddr); /* m8: */
+            printf("%-8.8s %8" PRIx32 " %8" PRIx32, pp->psectSym->name, addr, pp->endAddr); /* m8: */
         }
     }
     fputc('\n', stdout);
@@ -126,15 +126,15 @@ void prFileLinkMap() {
  **************************************************************************/
 void output_summary(register psect_t *st) {
 
-    printf("\t\t%-8.8s ", st->psectSym->name); /* Name   */
+    printf("\t\t%-8.8s ", st->psectSym->name); 		/* Name   */
 
     if (key_R != 0) { /* Link   */
         printf("%8c", 0x20);
     } else {
-        printf("%8lx", st->linkAddress);
+        printf("%8" PRIx32, st->linkAddress);
     }
-    printf(" %8lx", st->loadAddress);       /* Load   */
-    printf(" %8lx\n", st->blkStartAddress); /* Length */
+    printf(" %8" PRIx32, st->loadAddress);       	/* Load   */
+    printf(" %8" PRIx32 "\n", st->blkStartAddress); 	/* Length */
 }
 
 /**************************************************************************

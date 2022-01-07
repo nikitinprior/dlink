@@ -278,7 +278,7 @@ void writeText() {
         targetAddress = conv_btou32(textRecBuf); /* Pick up the text record offset */
 
         if (targetAddress < offset_address)
-            fatal_err("module has code below file base of 0%lxh", offset_address);
+            fatal_err("module has code below file base of 0%" PRIx32 "h", offset_address);
 
         if (fseek(outFp, targetAddress - offset_address, SEEK_SET) == -1)
             fatal_err("%s: Seek error", fname_outp);
@@ -386,7 +386,7 @@ uint32_t conv_btou32(register uint8_t *p1) {
     l2 = 4;
     l1 = 0;
     while (l2-- > 0)
-        l1 += ((uint32_t)(uint16_t)p1[order32[l2]]) << (l2 * 8);
+        l1 += ((uint32_t)(uint16_t)p1[order32[(int)l2]]) << (l2 * 8);
     return l1;
 }
 
@@ -413,7 +413,7 @@ uint32_t conv_btou24(register uint8_t *p1) {
     l2 = 3;
     l1 = 0;
     while (l2-- > 0)
-        l1 += ((uint32_t)(uint16_t)p1[order32[l2]] << (l2 * 8));
+        l1 += ((uint32_t)(uint16_t)p1[order32[(int)l2]] << (l2 * 8));
     return l1;
 }
 

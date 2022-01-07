@@ -83,9 +83,10 @@
 
 
 #if defined(__STDC__) || defined(__STDC_VERSION__)
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <limits.h>
+#include <inttypes.h>
 #if __STDC_VERSION__ < 201112L
 #define _Noreturn
 #endif
@@ -103,6 +104,8 @@ typedef unsigned long uint32_t;
 #define false 0
 #define const
 #define _Noreturn
+#define PRIx32 "lx" /* assume uint32_t is a long */
+#define PRId32 "ld"
 #endif
 
 typedef struct _sym {
@@ -112,7 +115,7 @@ typedef struct _sym {
     } p;
     struct _sym *psectSym;
     char *name;
-    uint16_t flags;        /* maxSize; */
+    uint16_t flags;
     uint8_t fileId;
 } sym_t;
 
@@ -219,7 +222,12 @@ void            badFormat(char const *fmt, ...);
 #endif
 
 extern void    *xalloc(size_t);					/* 1265 40 ok++ */
-extern void     clrbuf(char *, size_t);				/* 1296 41 ok++ */
+#ifdef CPM
+extern void     clrbuf(char *, size_t);                         /* 1296 41 ok++ */
+#else
+#define clrbuf(b, n) memset(b, 0, n)
+#endif
+
 extern void     relocRecPass1();				/* 12d2 42 ok++	*/
 extern void     relocRecPass2();				/* 1339 43 ok+-	*/
 extern void     fixup(int, uint16_t, uint32_t);			/* 1912 44 ok+- */
@@ -251,6 +259,10 @@ extern int      compare_fun(const void *, const void *);	/* 3a5b 67 ok++ */
 extern int      textRecPass1();					/* 3b30 68 ok++	*/
 extern void     textRecPass2();					/* 3c04 69 ok++	*/
 extern void     startRecPass2();				/* 3cea 70 ok++	*/
+/*------------------------------------------------- File extra.c */
+#ifndef CPM
+char const *mkLibPath(char const *s);
+#endif
 /* End prototype functions LINK */
 
 /*------------------------------------------------- File a.c */
@@ -287,7 +299,7 @@ extern bool     moduleNeeded;		/* 7c31 */
 extern int      num_files;		/* 7c32 */
 extern FILE    *libraryFp;		/* 7c34 */
 extern int      symCnt;			/* 7c36 */
-extern uint8_t  ibBuf[100];		/* 7c38 */
+extern uint8_t  libBuf[100];		/* 7c38 */
 extern vec_t  **libTable;		/* 7c9c */
 extern bool     haveEntryPt;		/* 7c9e */
 extern char    *libraryName;		/* 7c9f */
